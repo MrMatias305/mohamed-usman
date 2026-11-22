@@ -7,46 +7,259 @@ const articles = await getCollection(
   ({ data }) => data.draft !== true
 );
 
-const publishedArticles = articles.sort(
+const sortedArticles = articles.sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
+
+const formatDate = (date: Date) =>
+  date.toLocaleDateString('en', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 ---
 
 <BaseLayout
-  title="Articles | Mohamed Usman"
-  description="Articles, reflections and lessons by Mohamed Usman."
+  title="Articles — Mohamed Usman"
+  description="Essays, reflections, ideas and lessons about life."
 >
-  <h1>Articles</h1>
+  <section class="archive-intro">
+    <p class="eyebrow"><span></span> THE JOURNAL</p>
 
-  <p>Thoughts, reflections and lessons about life.</p>
+    <h1>Words, thoughts<br />&amp; <em>perspectives.</em></h1>
 
-  {
-    publishedArticles.length > 0 ? (
-      <ul>
-        {publishedArticles.map((article) => (
-          <li>
-            <article>
-              <h2>
-                <a href={`/articles/${article.id}/`}>
-                  {article.data.title}
-                </a>
-              </h2>
+    <p class="intro-description">
+      A collection of ideas, personal reflections, experiences,
+      and lessons worth sharing.
+    </p>
+  </section>
 
-              <p>{article.data.description}</p>
+  <section class="archive">
+    <div class="archive-heading">
+      <h2>All articles</h2>
+      <span>{sortedArticles.length} {sortedArticles.length === 1 ? 'ARTICLE' : 'ARTICLES'}</span>
+    </div>
 
-              <time datetime={article.data.pubDate.toISOString()}>
-                {article.data.pubDate.toLocaleDateString('en', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </time>
+    {
+      sortedArticles.length > 0 ? (
+        <div class="article-list">
+          {sortedArticles.map((article, index) => (
+            <article class="article-item">
+              <div class="article-index">
+                {String(index + 1).padStart(2, '0')}
+              </div>
+
+              <div class="article-details">
+                <time datetime={article.data.pubDate.toISOString()}>
+                  {formatDate(article.data.pubDate)}
+                </time>
+
+                <h3>
+                  <a href={`/articles/${article.id}/`}>
+                    {article.data.title}
+                  </a>
+                </h3>
+
+                <p>{article.data.description}</p>
+
+                {article.data.tags.length > 0 && (
+                  <div class="tags">
+                    {article.data.tags.map((tag) => (
+                      <span>{tag}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <a
+                href={`/articles/${article.id}/`}
+                class="read-link"
+                aria-label={`Read ${article.data.title}`}
+              >
+                ↗
+              </a>
             </article>
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p>No articles published yet.</p>
-    )
-  }
+          ))}
+        </div>
+      ) : (
+        <div class="empty-state">
+          <p>Nothing here just yet.</p>
+          <span>New writing will find its way here soon.</span>
+        </div>
+      )
+    }
+  </section>
 </BaseLayout>
+
+<style>
+  .archive-intro {
+    padding: 5rem 0 6rem;
+  }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+  }
+
+  .eyebrow span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .archive-intro h1 {
+    margin: 2rem 0;
+    font-size: clamp(3.2rem, 8vw, 5.8rem);
+    line-height: 1.1;
+    letter-spacing: -0.055em;
+  }
+
+  .archive-intro h1 em {
+    color: var(--accent);
+    font-weight: 400;
+  }
+
+  .intro-description {
+    max-width: 440px;
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.9;
+  }
+
+  .archive {
+    padding: 2.5rem 0 4rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .archive-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .archive-heading h2 {
+    margin: 0;
+    font-size: 2rem;
+  }
+
+  .archive-heading > span {
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+  }
+
+  .article-item {
+    display: grid;
+    grid-template-columns: 45px 1fr 30px;
+    gap: 1.5rem;
+    align-items: start;
+    padding: 2.2rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .article-index {
+    padding-top: 0.1rem;
+    color: #aaa49b;
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+  }
+
+  .article-details time {
+    display: block;
+    margin-bottom: 0.6rem;
+  }
+
+  .article-details h3 {
+    margin: 0;
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+  }
+
+  .article-details h3 a {
+    text-decoration: none;
+    transition: color 180ms ease;
+  }
+
+  .article-details h3 a:hover {
+    color: var(--accent);
+  }
+
+  .article-details > p {
+    max-width: 650px;
+    margin: 0.6rem 0 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.8;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .tags span {
+    padding: 0.2rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--muted);
+    font-size: 0.7rem;
+  }
+
+  .read-link {
+    color: var(--muted);
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition:
+      color 180ms ease,
+      transform 180ms ease;
+  }
+
+  .read-link:hover {
+    color: var(--text);
+    transform: translate(3px, -3px);
+  }
+
+  .empty-state {
+    padding: 3rem 0;
+  }
+
+  .empty-state p {
+    margin-bottom: 0.3rem;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+  }
+
+  .empty-state span {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 600px) {
+    .archive-intro {
+      padding: 4rem 0 4.5rem;
+    }
+
+    .article-item {
+      grid-template-columns: 25px 1fr 20px;
+      gap: 0.8rem;
+      padding: 1.7rem 0;
+    }
+
+    .article-details h3 {
+      font-size: 1.4rem;
+    }
+
+    .article-details > p {
+      font-size: 0.85rem;
+    }
+  }
+</style>
