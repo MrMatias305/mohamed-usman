@@ -5,7 +5,7 @@ pubDate: 2026-11-22
 tags:
   - testing
   - publishing
-draft: true
+draft: false
 ---
 
 # Hello, world.
